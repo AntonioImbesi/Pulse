@@ -1,0 +1,1 @@
+Side effects are currently handled through a Channel. Using a SharedFlow behaves slightly differently, but in some cases it may be a better fit. While it is possible to create an alternative implementation of MviEngine, this behavior could potentially be provided directly.
