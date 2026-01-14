@@ -1,5 +1,11 @@
 package io.github.antonioimbesi.pulse.test
 
+import io.github.antonioimbesi.pulse.core.processor.ProcessorScope
+import io.github.antonioimbesi.pulse.test.event.ProcessorEvent
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
+
 /**
  * Advanced test scope with additional utilities for complex scenarios.
  */

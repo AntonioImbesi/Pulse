@@ -11,7 +11,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 /**
  * Test builder for processors that emit flows.
  */
-class FlowProcessorTestBuilder<UiState, Intention, SideEffect, T>(
+class FlowProcessorTestBuilder<UiState, Intention: Any, SideEffect, T>(
     private val testScope: TestScope,
     private val initialState: UiState,
     private val flow: Flow<T>
