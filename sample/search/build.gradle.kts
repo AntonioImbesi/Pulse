@@ -44,7 +44,7 @@ dependencies {
     implementation(projects.pulseCore)
     implementation(projects.pulseAndroid)
     implementation(libs.androidx.foundation.layout)
-    ksp(projects.pulseCore)
+    ksp(projects.pulseCompiler)
 
     implementation(libs.compose.activity)
     implementation(libs.material3)

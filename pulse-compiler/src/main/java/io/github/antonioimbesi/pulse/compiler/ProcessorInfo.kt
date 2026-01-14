@@ -1,4 +1,4 @@
-package io.github.antonioimbesi.pulse.core.processor.internal
+package io.github.antonioimbesi.pulse.compiler
 
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.processing.KSPLogger

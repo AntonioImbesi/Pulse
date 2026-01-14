@@ -44,7 +44,7 @@ android {
 dependencies {
     implementation(projects.pulseAndroid)
     testImplementation(projects.pulseTest)
-    ksp(projects.pulseCore)
+    ksp(projects.pulseCompiler)
 
     implementation(libs.compose.activity)
     implementation(libs.material3)
