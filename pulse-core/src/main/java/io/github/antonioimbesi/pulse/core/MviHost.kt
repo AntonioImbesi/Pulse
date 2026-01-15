@@ -1,11 +1,10 @@
 package io.github.antonioimbesi.pulse.core
 
-import io.github.antonioimbesi.pulse.core.engine.MviEngine
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-interface MviHost<UiState, Intention : Any, SideEffect> {
-    val uiState: StateFlow<UiState>
+interface MviHost<State, Intent : Any, SideEffect> {
+    val state: StateFlow<State>
     val sideEffect: Flow<SideEffect>
-    infix fun dispatch(intention: Intention)
+    infix fun dispatch(intent: Intent)
 }

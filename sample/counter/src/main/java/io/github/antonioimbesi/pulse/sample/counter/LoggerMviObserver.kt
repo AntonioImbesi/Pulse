@@ -1,11 +1,11 @@
 package io.github.antonioimbesi.pulse.sample.counter
 
 import android.util.Log
-import io.github.antonioimbesi.pulse.core.observer.IntentionObserver
+import io.github.antonioimbesi.pulse.core.observer.IntentObserver
 import io.github.antonioimbesi.pulse.core.observer.SideEffectObserver
 import io.github.antonioimbesi.pulse.core.observer.StateObserver
 
-object LoggerMviObserver : IntentionObserver, StateObserver, SideEffectObserver {
+object LoggerMviObserver : IntentObserver, StateObserver, SideEffectObserver {
 
     override fun onSideEffect(sideEffect: Any) {
         if (BuildConfig.DEBUG)
@@ -17,8 +17,8 @@ object LoggerMviObserver : IntentionObserver, StateObserver, SideEffectObserver 
             Log.d(CounterMviEngineFactory::class.simpleName, "NewState: $newState")
     }
 
-    override fun onIntention(intention: Any) {
+    override fun onIntent(intent: Any) {
         if (BuildConfig.DEBUG)
-            Log.d(CounterMviEngineFactory::class.simpleName, "Intention: $intention")
+            Log.d(CounterMviEngineFactory::class.simpleName, "Intent: $intent")
     }
 }

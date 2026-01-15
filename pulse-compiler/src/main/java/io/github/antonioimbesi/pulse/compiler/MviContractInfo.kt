@@ -5,7 +5,7 @@ import com.google.devtools.ksp.symbol.KSType
 
 internal data class MviContractInfo(
     val stateType: KSType,
-    val baseIntentionType: KSType,
+    val baseIntentType: KSType,
     val sideEffectType: KSType,
 ) {
     internal companion object {
@@ -16,8 +16,8 @@ internal data class MviContractInfo(
                     .superTypes.first().resolve()
             val stateType = processorInterface.arguments[0].type!!.resolve()
             val sideEffectType = processorInterface.arguments[2].type!!.resolve()
-            val baseIntentionType = firstProcessor.baseIntentionType
-            return MviContractInfo(stateType, baseIntentionType, sideEffectType)
+            val baseIntentType = firstProcessor.baseIntentType
+            return MviContractInfo(stateType, baseIntentType, sideEffectType)
         }
     }
 }

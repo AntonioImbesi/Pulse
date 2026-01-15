@@ -5,14 +5,14 @@ import org.junit.Assert.assertEquals
 /**
  * Builder for expected event sequences.
  */
-class EventSequenceBuilder<UiState, SideEffect> {
-    private val events = mutableListOf<ExpectedEvent<UiState, SideEffect>>()
+class EventSequenceBuilder<State, SideEffect> {
+    private val events = mutableListOf<ExpectedEvent<State, SideEffect>>()
 
-    fun state(assertion: (UiState) -> Unit) {
+    fun state(assertion: (State) -> Unit) {
         events.add(ExpectedEvent.State(assertion))
     }
 
-    fun state(expected: UiState) {
+    fun state(expected: State) {
         events.add(ExpectedEvent.State { assertEquals(expected, it) })
     }
 

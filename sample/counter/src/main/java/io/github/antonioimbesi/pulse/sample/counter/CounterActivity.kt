@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.antonioimbesi.pulse.android.collectAsEffectWithLifecycle
-import io.github.antonioimbesi.pulse.sample.counter.contract.CounterIntention
+import io.github.antonioimbesi.pulse.sample.counter.contract.CounterIntent
 import io.github.antonioimbesi.pulse.sample.counter.contract.CounterSideEffect
 
 @AndroidEntryPoint
@@ -34,7 +34,7 @@ class CounterActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val context = LocalContext.current
-            val state = viewModel.uiState.collectAsStateWithLifecycle()
+            val state = viewModel.state.collectAsStateWithLifecycle()
 
             viewModel.sideEffect.collectAsEffectWithLifecycle { sideEffect ->
                 when (sideEffect) {
@@ -57,13 +57,13 @@ class CounterActivity : ComponentActivity() {
                             .padding(innerPadding),
                     ) {
                         Button(
-                            onClick = { viewModel dispatch CounterIntention.Decrease },
+                            onClick = { viewModel dispatch CounterIntent.Decrease },
                         ) { Text(text = "-") }
 
                         Text(text = state.value.counter.toString())
 
                         Button(
-                            onClick = { viewModel dispatch CounterIntention.Increase },
+                            onClick = { viewModel dispatch CounterIntent.Increase },
                         ) { Text("+") }
                     }
                 }

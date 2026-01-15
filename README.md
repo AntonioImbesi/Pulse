@@ -12,16 +12,16 @@ Pulse provides a minimal yet powerful foundation for building reactive applicati
 // Define your contract
 data class CounterState(val count: Int = 0)
 
-sealed interface CounterIntention {
-    data object Increment : CounterIntention
-    data object Decrement : CounterIntention
+sealed interface CounterIntent {
+    data object Increment : CounterIntent
+    data object Decrement : CounterIntent
 }
 
 // Create processors
 @Processor
-class IncrementProcessor : IntentionProcessor<CounterState, CounterIntention.Increment, CounterEffect> {
+class IncrementProcessor : IntentProcessor<CounterState, CounterIntent.Increment, CounterEffect> {
     override suspend fun ProcessorScope<CounterState, CounterEffect>.process(
-        intention: CounterIntention.Increment
+        intent: CounterIntent.Increment
     ) {
         reduce { copy(count = count + 1) }
     }
@@ -30,8 +30,8 @@ class IncrementProcessor : IntentionProcessor<CounterState, CounterIntention.Inc
 // Use in ViewModel
 @HiltViewModel
 class CounterViewModel @Inject constructor(
-    engineFactory: MviEngineFactory<CounterState, CounterIntention, CounterEffect>
-) : MviViewModel<CounterState, CounterIntention, CounterEffect>(
+    engineFactory: MviEngineFactory<CounterState, CounterIntent, CounterEffect>
+) : MviViewModel<CounterState, CounterIntent, CounterEffect>(
     engineFactory = engineFactory,
     initialState = CounterState()
 )
@@ -39,9 +39,9 @@ class CounterViewModel @Inject constructor(
 // Integrate with Compose
 @Composable
 fun CounterScreen(viewModel: CounterViewModel = viewModel()) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.state.collectAsState()
     
-    Button(onClick = { viewModel dispatch CounterIntention.Increment }) {
+    Button(onClick = { viewModel dispatch CounterIntent.Increment }) {
         Text("Count: ${state.count}")
     }
 }
@@ -51,7 +51,7 @@ fun CounterScreen(viewModel: CounterViewModel = viewModel()) {
 
 ## Key Features
 
-✅ **Type-Safe**: Full compile-time verification of state, intentions, and side effects  
+✅ **Type-Safe**: Full compile-time verification of state, intents, and side effects  
 ✅ **Zero Runtime Overhead**: All wiring generated at compile-time via KSP  
 ✅ **Coroutine-First**: Built on Kotlin Coroutines and Flow  
 ✅ **Minimal Boilerplate**: Annotate processors, get automatic execution routing  
@@ -64,48 +64,48 @@ fun CounterScreen(viewModel: CounterViewModel = viewModel()) {
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         UI Layer                            │
-│         (Compose, dispatches intentions)                    │
-└────────────────────┬────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                         UI Layer                         │
+│         (Compose, dispatches intents)                    │
+└────────────────────┬─────────────────────────────────────┘
                      │
                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    MviViewModel                             │
-│     (Manages lifecycle, exposes state & effects)            │
-└────────────────────┬────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                    MviViewModel                          │
+│     (Manages lifecycle, exposes state & effects)         │
+└────────────────────┬─────────────────────────────────────┘
                      │
                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     MviEngine                               │
-│   (Coordinates state, routes intentions to executor)        │
-└────────────────────┬────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                     MviEngine                            │
+│   (Coordinates state, routes intents to executor)        │
+└────────────────────┬─────────────────────────────────────┘
                      │
                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│              ProcessorExecutor (Generated)                  │
-│       (Type-safe routing to appropriate processor)          │
-└────────────────────┬────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│              ProcessorExecutor (Generated)               │
+│       (Type-safe routing to appropriate processor)       │
+└────────────────────┬─────────────────────────────────────┘
                      │
                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│                Individual Processors                        │
-│  (Handle specific intentions, update state, emit effects)   │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                Individual Processors                     │
+│  (Handle specific intents, update state, emit effects)   │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ### Core Concepts
 
 **MVI Contract**: Every feature defines three types:
 - **State**: Immutable data class representing UI state
-- **Intentions**: Sealed interface of user actions
+- **Intents**: Sealed interface of user actions
 - **Side Effects**: One-time events (navigation, toasts, etc.)
 
-**Processors**: Pure functions that handle specific intention types:
+**Processors**: Pure functions that handle specific intent types:
 - Annotated with `@Processor`
 - Update state via `reduce {}`
 - Emit side effects via `send()`
-- Access current state via `currentUiState`
+- Access current state via `currentState`
 
 **Code Generation**: KSP generates type-safe routing at compile-time:
 - Exhaustive when statements
@@ -165,11 +165,11 @@ data class LoginState(
     val error: String? = null
 )
 
-// Intentions - User actions
-sealed interface LoginIntention {
-    data class EmailChanged(val email: String) : LoginIntention
-    data class PasswordChanged(val password: String) : LoginIntention
-    data object LoginClicked : LoginIntention
+// Intents - User actions
+sealed interface LoginIntent {
+    data class EmailChanged(val email: String) : LoginIntent
+    data class PasswordChanged(val password: String) : LoginIntent
+    data object LoginClicked : LoginIntent
 }
 
 // Side Effects - One-time events
@@ -183,24 +183,24 @@ sealed interface LoginEffect {
 
 ```kotlin
 @Processor
-class EmailChangedProcessor : IntentionProcessor<LoginState, LoginIntention.EmailChanged, LoginEffect> {
+class EmailChangedProcessor : IntentProcessor<LoginState, LoginIntent.EmailChanged, LoginEffect> {
     override suspend fun ProcessorScope<LoginState, LoginEffect>.process(
-        intention: LoginIntention.EmailChanged
+        intent: LoginIntent.EmailChanged
     ) {
-        reduce { copy(email = intention.email, error = null) }
+        reduce { copy(email = intent.email, error = null) }
     }
 }
 
 @Processor
 class LoginClickedProcessor(
     private val authRepository: AuthRepository
-) : IntentionProcessor< LoginState, LoginIntention.LoginClicked, LoginEffect> {
+) : IntentProcessor< LoginState, LoginIntent.LoginClicked, LoginEffect> {
     override suspend fun ProcessorScope<LoginState, LoginEffect>.process(
-        intention: LoginIntention.LoginClicked
+        intent: LoginIntent.LoginClicked
     ) {
         reduce { copy(isLoading = true, error = null) }
         
-        when (val result = authRepository.login(currentUiState.email, currentUiState.password)) {
+        when (val result = authRepository.login(currentState.email, currentState.password)) {
             is Success -> {
                 reduce { copy(isLoading = false) }
                 send(LoginEffect.NavigateToHome)
@@ -233,12 +233,12 @@ object LoginModule {
         return LoginClickedProcessor(authRepository)
     }
     
-    // Generated LoginIntentionProcessorExecutor has @Inject constructor
+    // Generated LoginIntentProcessorExecutor has @Inject constructor
     
     @Provides
     fun provideEngineFactory(
-        processorExecutor: LoginIntentionProcessorExecutor
-    ): MviEngineFactory<LoginState, LoginIntention, LoginEffect> {
+        processorExecutor: LoginIntentProcessorExecutor
+    ): MviEngineFactory<LoginState, LoginIntent, LoginEffect> {
         return DefaultMviEngineFactory(processorExecutor)
     }
 }
@@ -249,8 +249,8 @@ object LoginModule {
 ```kotlin
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    engineFactory: MviEngineFactory<LoginState, LoginIntention, LoginEffect>
-) : MviViewModel<LoginState, LoginIntention, LoginEffect>(
+    engineFactory: MviEngineFactory<LoginState, LoginIntent, LoginEffect>
+) : MviViewModel<LoginState, LoginIntent, LoginEffect>(
     engineFactory = engineFactory,
     initialState = LoginState()
 )
@@ -264,7 +264,7 @@ fun LoginScreen(
     viewModel: LoginViewModel = viewModel(),
     onNavigateToHome: () -> Unit
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     
     viewModel.sideEffect.collectAsEffectWithLifecycle { effect ->
@@ -282,7 +282,7 @@ fun LoginScreen(
     ) {
         OutlinedTextField(
             value = state.email,
-            onValueChange = { viewModel dispatch LoginIntention.EmailChanged(it) },
+            onValueChange = { viewModel dispatch LoginIntent.EmailChanged(it) },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -291,7 +291,7 @@ fun LoginScreen(
         
         OutlinedTextField(
             value = state.password,
-            onValueChange = { viewModel dispatch LoginIntention.PasswordChanged(it) },
+            onValueChange = { viewModel dispatch LoginIntent.PasswordChanged(it) },
             label = { Text("Password") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -299,7 +299,7 @@ fun LoginScreen(
         Spacer(Modifier.height(16.dp))
         
         Button(
-            onClick = { viewModel dispatch LoginIntention.LoginClicked },
+            onClick = { viewModel dispatch LoginIntent.LoginClicked },
             modifier = Modifier.fillMaxWidth(),
             enabled = !state.isLoading
         ) {
@@ -323,7 +323,7 @@ fun `login success navigates to home`() = runTest {
     testProcessor(
         initialState = LoginState(),
         processor = LoginClickedProcessor(fakeRepository),
-        intention = LoginIntention.LoginClicked
+        intent = LoginIntent.LoginClicked
     ) {
         expectEvents {
             state(LoginState(isLoading = true))           // Loading starts
@@ -340,7 +340,7 @@ fun `login failure shows error`() = runTest {
     testProcessor(
         initialState = LoginState(),
         processor = LoginClickedProcessor(fakeRepository),
-        intention = LoginIntention.LoginClicked
+        intent = LoginIntent.LoginClicked
     ) {
         expectEvents {
             state { it.isLoading }
@@ -361,29 +361,29 @@ When you build, KSP generates a `ProcessorExecutor` for each feature:
 
 ```kotlin
 // Generated in com.example.login.generated package
-internal class LoginIntentionProcessorExecutor @Inject constructor(
+internal class LoginIntentProcessorExecutor @Inject constructor(
     private val emailChangedProcessor: EmailChangedProcessor,
     private val passwordChangedProcessor: PasswordChangedProcessor,
     private val loginClickedProcessor: LoginClickedProcessor
-) : ProcessorExecutor<LoginState, LoginIntention, LoginEffect> {
+) : ProcessorExecutor<LoginState, LoginIntent, LoginEffect> {
     override suspend fun execute(
         context: ProcessorScope<LoginState, LoginEffect>,
-        intention: LoginIntention
+        intent: LoginIntent
     ) {
-        when (intention) {
-            is LoginIntention.EmailChanged -> 
-                with(emailChangedProcessor) { context.process(intention) }
-            is LoginIntention.PasswordChanged -> 
-                with(passwordChangedProcessor) { context.process(intention) }
-            is LoginIntention.LoginClicked -> 
-                with(loginClickedProcessor) { context.process(intention) }
+        when (intent) {
+            is LoginIntent.EmailChanged -> 
+                with(emailChangedProcessor) { context.process(intent) }
+            is LoginIntent.PasswordChanged -> 
+                with(passwordChangedProcessor) { context.process(intent) }
+            is LoginIntent.LoginClicked -> 
+                with(loginClickedProcessor) { context.process(intent) }
         }
     }
 }
 ```
 
 Benefits:
-- **Type-safe**: Compile error if intention not handled
+- **Type-safe**: Compile error if intent not handled
 - **No reflection**: Zero runtime overhead
 - **DI-ready**: `@Inject` constructor when javax.inject available
 - **Debuggable**: Generated code is readable and navigable
@@ -393,7 +393,7 @@ Benefits:
 ## Why Pulse?
 
 ### vs Manual MVI
-- ❌ Manual: Boilerplate when/reduce functions, easy to forget intentions
+- ❌ Manual: Boilerplate when/reduce functions, easy to forget intents
 - ✅ Pulse: Generated routing, compile-time exhaustiveness checking
 
 ### vs Orbit MVI
@@ -417,12 +417,12 @@ Benefits:
 // Good: One responsibility
 @Processor
 class LoadUserProcessor(private val repo: UserRepository) : 
-    IntentionProcessor<ProfileState, LoadUser, ProfileEffect> {
+    IntentProcessor<ProfileState, LoadUser, ProfileEffect> {
     override suspend fun ProcessorScope<ProfileState, ProfileEffect>.process(
-        intention: LoadUser
+        intent: LoadUser
     ) {
         reduce { copy(isLoading = true) }
-        val user = repo.getUser(intention.userId)
+        val user = repo.getUser(intent.userId)
         reduce { copy(isLoading = false, user = user) }
     }
 }
@@ -431,9 +431,9 @@ class LoadUserProcessor(private val repo: UserRepository) :
 ### ✅ DO: Use Sealed Interfaces
 ```kotlin
 // Good: Exhaustive, type-safe
-sealed interface ProfileIntention {
-    data class LoadUser(val userId: String) : ProfileIntention
-    data object Refresh : ProfileIntention
+sealed interface ProfileIntent {
+    data class LoadUser(val userId: String) : ProfileIntent
+    data object Refresh : ProfileIntent
 }
 ```
 
@@ -450,7 +450,7 @@ data class ProfileState(
 ```kotlin
 // Bad: Processors should be stateless
 @Processor
-class BadProcessor : IntentionProcessor<...> {
+class BadProcessor : IntentProcessor<...> {
     private var counter = 0  // ❌ Mutable state
 }
 
@@ -468,7 +468,7 @@ class MyViewModel(...) : MviViewModel(...) {
 // Good: Logic in processor
 @Processor
 class ValidateProcessor(private val validator: EmailValidator) : 
-    IntentionProcessor<...> { }
+    IntentProcessor<...> { }
 ```
 
 ---
@@ -478,7 +478,7 @@ class ValidateProcessor(private val validator: EmailValidator) :
 - **Compile-time**: ~1-2 seconds overhead for 50+ processors
 - **Runtime**: Zero reflection, minimal allocation (immutable state)
 - **Memory**: StateFlow replays latest state (one instance)
-- **Concurrency**: Intentions processed concurrently by default
+- **Concurrency**: Intents processed concurrently by default
 
 ---
 

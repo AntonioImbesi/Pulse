@@ -6,8 +6,8 @@ import org.junit.Assert.assertEquals
 /**
  * Assertions for testing with flows.
  */
-class FlowTestAssertions<UiState, SideEffect, T>(
-    private val scope: AdvancedProcessorTestScope<UiState, SideEffect>,
+class FlowTestAssertions<State, SideEffect, T>(
+    private val scope: AdvancedProcessorTestScope<State, SideEffect>,
     private val flowValues: List<T>
 ) {
     fun assertFlowEmissions(vararg expected: T) {
@@ -18,11 +18,11 @@ class FlowTestAssertions<UiState, SideEffect, T>(
         assertEquals("Flow emission count mismatch", count, flowValues.size)
     }
     
-    fun assertEvents(assertion: (List<ProcessorEvent<UiState, SideEffect>>) -> Unit) {
+    fun assertEvents(assertion: (List<ProcessorEvent<State, SideEffect>>) -> Unit) {
         assertion(scope.events)
     }
     
-    fun assertFinalState(expected: UiState) {
+    fun assertFinalState(expected: State) {
         assertEquals(expected, scope.finalState)
     }
 }

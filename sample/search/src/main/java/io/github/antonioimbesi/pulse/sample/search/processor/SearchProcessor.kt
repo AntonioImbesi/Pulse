@@ -1,9 +1,9 @@
 package io.github.antonioimbesi.pulse.sample.search.processor
 
-import io.github.antonioimbesi.pulse.core.processor.IntentionProcessor
+import io.github.antonioimbesi.pulse.core.processor.IntentProcessor
 import io.github.antonioimbesi.pulse.core.processor.Processor
 import io.github.antonioimbesi.pulse.core.processor.ProcessorScope
-import io.github.antonioimbesi.pulse.sample.search.contract.SearchIntention
+import io.github.antonioimbesi.pulse.sample.search.contract.SearchIntent
 import io.github.antonioimbesi.pulse.sample.search.contract.SearchState
 import io.github.antonioimbesi.pulse.sample.search.contract.SearchState.ResultState
 import io.github.antonioimbesi.pulse.sample.search.domain.GetAllItemsUseCase
@@ -23,21 +23,21 @@ import javax.inject.Inject
 class SearchProcessor @Inject constructor(
     private val getAllItemsUseCase: GetAllItemsUseCase,
     private val getFilteredItemsUseCase: GetFilteredItemsUseCase
-) : IntentionProcessor<SearchState, SearchIntention.Search, Unit> {
+) : IntentProcessor<SearchState, SearchIntent.Search, Unit> {
 
     private val processorScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var searchJob: Job? = null
 
     @OptIn(FlowPreview::class)
     override suspend fun ProcessorScope<SearchState, Unit>.process(
-        intention: SearchIntention.Search
+        intent: SearchIntent.Search
     ) {
-        reduce { copy(query = intention.query, results = ResultState.Loading) }
+        reduce { copy(query = intent.query, results = ResultState.Loading) }
 
         searchJob?.cancel()
         searchJob = processorScope.launch {
             delay(500L) // Debounce
-            executeSearch(intention.query)
+            executeSearch(intent.query)
         }
     }
 

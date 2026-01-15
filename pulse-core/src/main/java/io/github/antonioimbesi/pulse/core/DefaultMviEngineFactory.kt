@@ -6,19 +6,19 @@ import io.github.antonioimbesi.pulse.core.processor.ProcessorExecutor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
-class DefaultMviEngineFactory<UiState, Intention : Any, SideEffect>(
-    private val processorExecutor: ProcessorExecutor<UiState, Intention, SideEffect>
-) : MviEngineFactory<UiState, Intention, SideEffect> {
+class DefaultMviEngineFactory<State, Intent : Any, SideEffect>(
+    private val processorExecutor: ProcessorExecutor<State, Intent, SideEffect>
+) : MviEngineFactory<State, Intent, SideEffect> {
 
     override fun create(
         coroutineScope: CoroutineScope,
-        initialState: UiState
-    ): MviEngine<UiState, Intention, SideEffect> {
+        initialState: State
+    ): MviEngine<State, Intent, SideEffect> {
         return DefaultMviEngine(
             initialState = initialState,
             processorExecutor = processorExecutor,
             coroutineScope = coroutineScope,
-            intentionDispatcher = Dispatchers.Default
+            intentDispatcher = Dispatchers.Default
         )
     }
 }

@@ -1,10 +1,10 @@
 package io.github.antonioimbesi.pulse.test.event
 
-sealed interface ProcessorEvent<out UiState, out SideEffect> {
-    data class StateChange<UiState>(
-        val oldState: UiState,
-        val newState: UiState
-    ) : ProcessorEvent<UiState, Nothing>
+sealed interface ProcessorEvent<out State, out SideEffect> {
+    data class StateChange<State>(
+        val oldState: State,
+        val newState: State
+    ) : ProcessorEvent<State, Nothing>
 
     data class SideEffectEmitted<SideEffect>(
         val sideEffect: SideEffect

@@ -1,20 +1,20 @@
 ```kotlin
-interface ProcessorContext<UiState, SideEffect> {
+interface ProcessorContext<State, SideEffect> {
     // ... existing methods
-    suspend fun dispatch(intention: Any) // NEW - internal dispatch
+    suspend fun dispatch(intent: Any) // NEW - internal dispatch
 }
 
 // Usage:
 @Processor
 class ComplexProcessor @Inject constructor(
     private val validationProcessor: ValidationProcessor
-) : IntentionProcessor<State, ComplexIntention, Effect> {
+) : IntentProcessor<State, ComplexIntent, Effect> {
     
     override suspend fun ProcessorContext<State, Effect>.process(
-        intention: ComplexIntention
+        intent: ComplexIntent
     ) {
         // Delegate validation
-        dispatch(ValidationIntention.Validate(intention.data))
+        dispatch(ValidationIntent.Validate(intent.data))
         
         // Continue with complex logic
         reduce { /* ... */ }

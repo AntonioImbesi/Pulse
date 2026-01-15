@@ -25,10 +25,10 @@ internal class ProcessorExecutorGenerator(
         if (!processorsKClass.iterator().hasNext()) return emptyList()
 
         processorsKClass.mapNotNull { ProcessorInfo.Companion.from(it, logger) }
-            .groupBy { it.baseIntentionType.declaration.qualifiedName!!.asString() }
-            .forEach { (baseIntentionFullName, processorsInfo) ->
+            .groupBy { it.baseIntentType.declaration.qualifiedName!!.asString() }
+            .forEach { (baseIntentFullName, processorsInfo) ->
                 generateMapperFactoryClass(
-                    baseIntentionFullName = baseIntentionFullName,
+                    baseIntentFullName = baseIntentFullName,
                     processorsInfo = processorsInfo,
                     resolver = resolver,
                 )
@@ -38,16 +38,16 @@ internal class ProcessorExecutorGenerator(
     }
 
     private fun generateMapperFactoryClass(
-        baseIntentionFullName: String,
+        baseIntentFullName: String,
         processorsInfo: List<ProcessorInfo>,
         resolver: Resolver,
     ) {
-        val baseIntentionDeclaration = processorsInfo.first().baseIntentionType.declaration
-        val featurePackageName = baseIntentionDeclaration.packageName.asString()
-        val baseIntentionSimpleName = baseIntentionFullName.substringAfterLast('.')
+        val baseIntentDeclaration = processorsInfo.first().baseIntentType.declaration
+        val featurePackageName = baseIntentDeclaration.packageName.asString()
+        val baseIntentSimpleName = baseIntentFullName.substringAfterLast('.')
 
         val packageName = "$featurePackageName.generated"
-        val executorClassName = "${baseIntentionSimpleName}ProcessorExecutor"
+        val executorClassName = "${baseIntentSimpleName}ProcessorExecutor"
 
         val fileContent = ProcessorExecutorFactory.generate(
             packageName = packageName,

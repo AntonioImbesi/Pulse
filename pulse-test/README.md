@@ -21,8 +21,8 @@ Soon...
 Every action in a processor generates an event:
 
 ```kotlin
-sealed interface ProcessorEvent<out UiState, out SideEffect> {
-    data class StateChange<UiState>(val oldState: UiState, val newState: UiState)
+sealed interface ProcessorEvent<out State, out SideEffect> {
+    data class StateChange<State>(val oldState: State, val newState: State)
     data class SideEffectEmitted<SideEffect>(val sideEffect: SideEffect)
 }
 ```
@@ -41,7 +41,7 @@ fun `increment counter`() = runTest {
     testProcessor(
         initialState = CounterState(0),
         processor = IncrementProcessor(),
-        intention = Increment
+        intent = Increment
     ) {
         finalState(CounterState(1))
         noSideEffects()
@@ -57,7 +57,7 @@ fun `login flow - verify order`() = runTest {
     testProcessor(
         initialState = LoginState.Idle,
         processor = LoginProcessor(mockRepo),
-        intention = Login("user", "pass")
+        intent = Login("user", "pass")
     ) {
         expectEvents {
             state(LoginState.Loading)           // First: loading state
@@ -76,7 +76,7 @@ fun `logout - effect before state`() = runTest {
     testProcessor(
         initialState = LoggedInState,
         processor = LogoutProcessor(),
-        intention = Logout
+        intent = Logout
     ) {
         expectEvents {
             sideEffect(ClearUserData)      // Side effect first
@@ -99,7 +99,7 @@ fun `async operation with delays`() = runTest {
     testProcessorAsync(
         initialState = DataState.Idle,
         processor = FetchDataProcessor(api),
-        intention = FetchData
+        intent = FetchData
     ) {
         expectEvents {
             state(DataState.Loading)
@@ -121,7 +121,7 @@ fun `processor collecting from flow`() = runTest {
     testProcessorWithFlows(
         initialState = StreamState(),
         processor = StreamProcessor(dataFlow),
-        intention = StartStream
+        intent = StartStream
     ) {
         advanceUntilIdle()
         
@@ -146,7 +146,7 @@ fun `debounced search`() = runTest {
     testProcessorWithFlows(
         initialState = SearchState(""),
         processor = SearchProcessor(),
-        intention = TypeSearch("query")
+        intent = TypeSearch("query")
     ) {
         // No results immediately
         assertEquals(0, eventCount())
@@ -298,7 +298,7 @@ fun `form validation - progressive feedback`() = runTest {
     testProcessor(
         initialState = FormState(),
         processor = ValidateFormProcessor(),
-        intention = SubmitForm(data)
+        intent = SubmitForm(data)
     ) {
         expectEvents {
             state(FormState(validating = true))
@@ -324,7 +324,7 @@ fun `retry after failure`() = runTest {
         else Result.Success
     }
     
-    testProcessorAsync(initialState, processor, intention) {
+    testProcessorAsync(initialState, processor, intent) {
         advanceUntilIdle()
         
         expectEvents {
@@ -348,7 +348,7 @@ fun `multiple services notified in order`() = runTest {
     testProcessor(
         initialState = CheckoutState(),
         processor = CompleteCheckoutProcessor(),
-        intention = Checkout
+        intent = Checkout
     ) {
         expectEvents {
             state(ProcessingPayment)
@@ -407,7 +407,7 @@ fun test() = runTest {
 ```kotlin
 @Test
 fun test() = runTest {
-    testProcessor(initialState, processor, intention) {
+    testProcessor(initialState, processor, intent) {
         finalState(expectedState)
         expectSideEffects(expectedEffect)
     }

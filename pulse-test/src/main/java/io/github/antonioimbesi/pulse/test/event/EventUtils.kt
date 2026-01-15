@@ -3,23 +3,23 @@ package io.github.antonioimbesi.pulse.test.event
 /**
  * Find the first state change event.
  */
-fun <UiState, SideEffect> List<ProcessorEvent<UiState, SideEffect>>.firstState(): UiState? =
-    filterIsInstance<ProcessorEvent.StateChange<UiState>>().firstOrNull()?.newState
+fun <State, SideEffect> List<ProcessorEvent<State, SideEffect>>.firstState(): State? =
+    filterIsInstance<ProcessorEvent.StateChange<State>>().firstOrNull()?.newState
 
 /**
  * Find the last state change event.
  */
-fun <UiState, SideEffect> List<ProcessorEvent<UiState, SideEffect>>.lastState(): UiState? =
-    filterIsInstance<ProcessorEvent.StateChange<UiState>>().lastOrNull()?.newState
+fun <State, SideEffect> List<ProcessorEvent<State, SideEffect>>.lastState(): State? =
+    filterIsInstance<ProcessorEvent.StateChange<State>>().lastOrNull()?.newState
 
 /**
  * Find the first side effect.
  */
-fun <UiState, SideEffect> List<ProcessorEvent<UiState, SideEffect>>.firstEffect(): SideEffect? =
+fun <State, SideEffect> List<ProcessorEvent<State, SideEffect>>.firstEffect(): SideEffect? =
     filterIsInstance<ProcessorEvent.SideEffectEmitted<SideEffect>>().firstOrNull()?.sideEffect
 
 /**
  * Find the last side effect.
  */
-fun <UiState, SideEffect> List<ProcessorEvent<UiState, SideEffect>>.lastEffect(): SideEffect? =
+fun <State, SideEffect> List<ProcessorEvent<State, SideEffect>>.lastEffect(): SideEffect? =
     filterIsInstance<ProcessorEvent.SideEffectEmitted<SideEffect>>().lastOrNull()?.sideEffect

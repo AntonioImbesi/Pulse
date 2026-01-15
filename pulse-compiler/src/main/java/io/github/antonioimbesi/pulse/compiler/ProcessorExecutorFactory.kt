@@ -1,7 +1,7 @@
 package io.github.antonioimbesi.pulse.compiler
 
 import com.google.devtools.ksp.processing.Resolver
-import io.github.antonioimbesi.pulse.core.processor.IntentionProcessor
+import io.github.antonioimbesi.pulse.core.processor.IntentProcessor
 import io.github.antonioimbesi.pulse.core.processor.ProcessorScope
 import io.github.antonioimbesi.pulse.core.processor.ProcessorExecutor
 
@@ -31,8 +31,8 @@ internal object ProcessorExecutorFactory {
         val injectAnnotation = if (isJavaInjectAvailable(resolver)) "@$javaInjectName " else ""
 
         val stateSimpleName = mviContractInfo.stateType.declaration.simpleName.asString()
-        val baseIntentionSimpleName =
-            mviContractInfo.baseIntentionType.declaration.simpleName.asString()
+        val baseIntentSimpleName =
+            mviContractInfo.baseIntentType.declaration.simpleName.asString()
         val sideEffectSimpleName = mviContractInfo.sideEffectType.declaration.simpleName.asString()
         val processorExecutorSimpleName = ProcessorExecutor::class.simpleName
 
@@ -44,12 +44,12 @@ internal object ProcessorExecutorFactory {
         |
         |internal class $executorClassName ${injectAnnotation}constructor(
         |    $constructorParams
-        |): $processorExecutorSimpleName<$stateSimpleName, $baseIntentionSimpleName, $sideEffectSimpleName> {
+        |): $processorExecutorSimpleName<$stateSimpleName, $baseIntentSimpleName, $sideEffectSimpleName> {
         |    override suspend fun execute(
         |        context: ProcessorScope<$stateSimpleName, $sideEffectSimpleName>,
-        |        intention: $baseIntentionSimpleName
+        |        intent: $baseIntentSimpleName
         |    ) {
-        |        when (intention) {
+        |        when (intent) {
         |$whenCases
         |        }
         |    }
@@ -63,12 +63,12 @@ internal object ProcessorExecutorFactory {
         resolver: Resolver
     ): String {
         val imports = mutableSetOf(
-            IntentionProcessor::class.qualifiedName!!,
+            IntentProcessor::class.qualifiedName!!,
             ProcessorScope::class.qualifiedName!!,
             ProcessorExecutor::class.qualifiedName!!,
             mviContractInfo.stateType.declaration.qualifiedName!!.asString(),
             mviContractInfo.sideEffectType.declaration.qualifiedName!!.asString(),
-            mviContractInfo.baseIntentionType.declaration.qualifiedName!!.asString()
+            mviContractInfo.baseIntentType.declaration.qualifiedName!!.asString()
         )
 
         if (isJavaInjectAvailable(resolver)) {
@@ -77,7 +77,7 @@ internal object ProcessorExecutorFactory {
 
         processors.forEach { info ->
             imports.add(info.parameterType.declaration.qualifiedName!!.asString())
-            imports.add(info.handledIntentionType.declaration.qualifiedName!!.asString())
+            imports.add(info.handledIntentType.declaration.qualifiedName!!.asString())
         }
 
         return imports.sorted().joinToString("\n") { "import $it" }
@@ -92,8 +92,8 @@ internal object ProcessorExecutorFactory {
     private fun buildWhenCases(processors: List<ProcessorInfo>): String {
         return processors.joinToString(separator = "\n") {
             """
-            |            is ${it.handledIntentionType.declaration.qualifiedName!!.asString()} ->
-            |                with(${it.parameterName}) { context.process(intention) }
+            |            is ${it.handledIntentType.declaration.qualifiedName!!.asString()} ->
+            |                with(${it.parameterName}) { context.process(intent) }
             """.trimMargin()
         }
     }

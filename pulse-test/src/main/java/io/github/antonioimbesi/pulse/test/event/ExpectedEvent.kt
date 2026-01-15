@@ -1,6 +1,6 @@
 package io.github.antonioimbesi.pulse.test.event
 
-internal sealed interface ExpectedEvent<out UiState, out SideEffect> {
-    data class State<UiState>(val assertion: (UiState) -> Unit) : ExpectedEvent<UiState, Nothing>
+internal sealed interface ExpectedEvent<out State, out SideEffect> {
+    data class State<State>(val assertion: (State) -> Unit) : ExpectedEvent<State, Nothing>
     data class Effect<SideEffect>(val assertion: (SideEffect) -> Unit) : ExpectedEvent<Nothing, SideEffect>
 }

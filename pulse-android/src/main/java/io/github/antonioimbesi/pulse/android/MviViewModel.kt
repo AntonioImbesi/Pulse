@@ -7,15 +7,15 @@ import io.github.antonioimbesi.pulse.core.MviHost
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-abstract class MviViewModel<UiState, Intention : Any, SideEffect>(
-    private val engineFactory: MviEngineFactory<UiState, Intention, SideEffect>,
-    initialState: UiState,
-) : ViewModel(), MviHost<UiState, Intention, SideEffect> {
+abstract class MviViewModel<State, Intent : Any, SideEffect>(
+    private val engineFactory: MviEngineFactory<State, Intent, SideEffect>,
+    initialState: State,
+) : ViewModel(), MviHost<State, Intent, SideEffect> {
 
     private val engine = engineFactory
         .create(viewModelScope, initialState)
 
-    override val uiState: StateFlow<UiState> get() = engine.uiState
+    override val state: StateFlow<State> get() = engine.state
     override val sideEffect: Flow<SideEffect> get() = engine.sideEffect
-    override infix fun dispatch(intention: Intention) = engine dispatch intention
+    override infix fun dispatch(intent: Intent) = engine dispatch intent
 }

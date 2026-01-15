@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.antonioimbesi.pulse.sample.search.contract.SearchIntention
+import io.github.antonioimbesi.pulse.sample.search.contract.SearchIntent
 import io.github.antonioimbesi.pulse.sample.search.contract.SearchState
 
 @Composable
@@ -35,21 +35,21 @@ fun SearchScreen(
     viewModel: SearchViewModel,
     modifier: Modifier
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewModel dispatch SearchIntention.Search()
+        viewModel dispatch SearchIntent.Search()
     }
 
     Column(modifier = modifier) {
         // Search bar
         OutlinedTextField(
             value = state.query,
-            onValueChange = { viewModel dispatch SearchIntention.Search(it) },
+            onValueChange = { viewModel dispatch SearchIntent.Search(it) },
             placeholder = { Text("Search...") },
             trailingIcon = {
                 if (state.query.isNotEmpty()) {
-                    IconButton(onClick = { viewModel dispatch SearchIntention.Search() }) {
+                    IconButton(onClick = { viewModel dispatch SearchIntent.Search() }) {
                         Icon(
                             imageVector = Icons.Default.Clear,
                             contentDescription = "Clear"

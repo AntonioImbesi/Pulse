@@ -1,6 +1,6 @@
 package io.github.antonioimbesi.pulse.test
 
-import io.github.antonioimbesi.pulse.core.processor.IntentionProcessor
+import io.github.antonioimbesi.pulse.core.processor.IntentProcessor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
@@ -11,24 +11,24 @@ import kotlinx.coroutines.test.advanceUntilIdle
 /**
  * Test builder for processors that emit flows.
  */
-class FlowProcessorTestBuilder<UiState, Intention: Any, SideEffect, T>(
+class FlowProcessorTestBuilder<State, Intent: Any, SideEffect, T>(
     private val testScope: TestScope,
-    private val initialState: UiState,
+    private val initialState: State,
     private val flow: Flow<T>
 ) {
-    private lateinit var processor: IntentionProcessor<UiState, Intention, SideEffect>
-    private lateinit var intention: Intention
+    private lateinit var processor: IntentProcessor<State, Intent, SideEffect>
+    private lateinit var intent: Intent
     
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun whenProcessing(
-        processor: IntentionProcessor<UiState, Intention, SideEffect>,
-        intention: Intention,
-        test: suspend FlowTestAssertions<UiState, SideEffect, T>.() -> Unit
+        processor: IntentProcessor<State, Intent, SideEffect>,
+        intent: Intent,
+        test: suspend FlowTestAssertions<State, SideEffect, T>.() -> Unit
     ) {
         this.processor = processor
-        this.intention = intention
+        this.intent = intent
         
-        val advancedScope = AdvancedProcessorTestScope<UiState, SideEffect>(initialState, testScope)
+        val advancedScope = AdvancedProcessorTestScope<State, SideEffect>(initialState, testScope)
         val flowValues = mutableListOf<T>()
         
         try {
@@ -37,9 +37,9 @@ class FlowProcessorTestBuilder<UiState, Intention: Any, SideEffect, T>(
                 flow.toList(flowValues)
             }
             
-            // Process intention
+            // Process intent
             with(processor) {
-                advancedScope.getScope().process(intention)
+                advancedScope.getScope().process(intent)
             }
             
             testScope.advanceUntilIdle()

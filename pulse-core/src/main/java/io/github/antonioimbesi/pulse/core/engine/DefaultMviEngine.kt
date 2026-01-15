@@ -1,6 +1,6 @@
 package io.github.antonioimbesi.pulse.core.engine
 
-import io.github.antonioimbesi.pulse.core.observer.IntentionObserver
+import io.github.antonioimbesi.pulse.core.observer.IntentObserver
 import io.github.antonioimbesi.pulse.core.observer.SideEffectObserver
 import io.github.antonioimbesi.pulse.core.observer.StateObserver
 import io.github.antonioimbesi.pulse.core.processor.ProcessorExecutor
@@ -14,37 +14,37 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlin.coroutines.EmptyCoroutineContext
 
-class DefaultMviEngine<UiState, Intention : Any, SideEffect>(
-    private val initialState: UiState,
-    private val processorExecutor: ProcessorExecutor<UiState, Intention, SideEffect>,
+class DefaultMviEngine<State, Intent : Any, SideEffect>(
+    private val initialState: State,
+    private val processorExecutor: ProcessorExecutor<State, Intent, SideEffect>,
     private val coroutineScope: CoroutineScope,
-    private val intentionDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val intentDispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val exceptionHandler: CoroutineExceptionHandler? = null,
-    private val intentionObservers: List<IntentionObserver> = emptyList(),
+    private val intentObservers: List<IntentObserver> = emptyList(),
     private val stateObservers: List<StateObserver> = emptyList(),
     private val sideEffectObservers: List<SideEffectObserver> = emptyList(),
-) : MviEngine<UiState, Intention, SideEffect> {
-    private val _uiState = MutableStateFlow(initialState)
-    override val uiState: StateFlow<UiState> get() = _uiState.asStateFlow()
+) : MviEngine<State, Intent, SideEffect> {
+    private val _state = MutableStateFlow(initialState)
+    override val state: StateFlow<State> get() = _state.asStateFlow()
 
     private val _sideEffect = Channel<SideEffect>(Channel.Factory.BUFFERED)
     override val sideEffect: Flow<SideEffect> get() = _sideEffect.receiveAsFlow()
 
-    private val processorScope = object : ProcessorScope<UiState, SideEffect> {
-        override val currentUiState: UiState get() = uiState.value
-        override fun reduce(reducer: UiState.() -> UiState) {
-            val oldState = currentUiState
-            val newState = reducer(oldState)
+    private val processorScope = object : ProcessorScope<State, SideEffect> {
+        override val currentState: State get() = state.value
+        override fun reduce(reducer: State.() -> State) {
 
-            _uiState.update { newState }
-
-            stateObservers.forEach {
-                it.onState(oldState as Any, newState as Any)
+            val oldState = currentState
+            val newState = _state.updateAndGet(reducer)
+            stateObservers.forEach { observer ->
+                observer.onState(oldState as Any, newState as Any)
             }
         }
 
@@ -54,12 +54,12 @@ class DefaultMviEngine<UiState, Intention : Any, SideEffect>(
         }
     }
 
-    override infix fun dispatch(intention: Intention) {
-        intentionObservers.forEach { it.onIntention(intention as Any) }
+    override infix fun dispatch(intent: Intent) {
+        intentObservers.forEach { it.onIntent(intent as Any) }
         coroutineScope.launch(
-            context = intentionDispatcher + (exceptionHandler ?: EmptyCoroutineContext)
+            context = intentDispatcher + (exceptionHandler ?: EmptyCoroutineContext)
         ) {
-            processorExecutor.execute(processorScope, intention)
+            processorExecutor.execute(processorScope, intent)
         }
     }
 }

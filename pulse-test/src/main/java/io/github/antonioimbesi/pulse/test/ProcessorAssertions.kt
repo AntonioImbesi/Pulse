@@ -9,22 +9,22 @@ import org.junit.Assert.assertTrue
 /**
  * Assertions DSL for verifying processor behavior.
  */
-class ProcessorAssertions<UiState, SideEffect>(
-    private val scope: ProcessorTestScope<UiState, SideEffect>
+class ProcessorAssertions<State, SideEffect>(
+    private val scope: ProcessorTestScope<State, SideEffect>
 ) {
 
     /**
      * Assert the final state after all operations.
      */
-    infix fun finalState(expected: UiState) {
+    infix fun finalState(expected: State) {
         assertEquals(expected, scope.finalState())
     }
 
     /**
      * Assert exact event sequence (states and side effects in order).
      */
-    fun expectEvents(builder: EventSequenceBuilder<UiState, SideEffect>.() -> Unit) {
-        val expected = EventSequenceBuilder<UiState, SideEffect>().apply(builder).build()
+    fun expectEvents(builder: EventSequenceBuilder<State, SideEffect>.() -> Unit) {
+        val expected = EventSequenceBuilder<State, SideEffect>().apply(builder).build()
         val actual = scope.events()
 
         assertEquals("Event count mismatch", expected.size, actual.size)
@@ -54,7 +54,7 @@ class ProcessorAssertions<UiState, SideEffect>(
     /**
      * Assert states in order (ignoring side effects).
      */
-    fun expectStates(vararg expected: UiState) {
+    fun expectStates(vararg expected: State) {
         assertEquals(expected.toList(), scope.states())
     }
 
@@ -89,7 +89,7 @@ class ProcessorAssertions<UiState, SideEffect>(
     /**
      * Custom assertion on all events.
      */
-    fun assertEvents(assertion: (List<ProcessorEvent<UiState, SideEffect>>) -> Unit) {
+    fun assertEvents(assertion: (List<ProcessorEvent<State, SideEffect>>) -> Unit) {
         assertion(scope.events())
     }
 }

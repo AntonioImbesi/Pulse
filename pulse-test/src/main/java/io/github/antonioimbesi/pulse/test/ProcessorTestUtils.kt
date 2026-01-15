@@ -1,21 +1,21 @@
 package io.github.antonioimbesi.pulse.test
 
-import io.github.antonioimbesi.pulse.core.processor.IntentionProcessor
+import io.github.antonioimbesi.pulse.core.processor.IntentProcessor
 import kotlinx.coroutines.test.TestScope
 
 /**
  * DSL entry point for processor testing.
  */
-suspend fun <UiState, Intention, SideEffect> testProcessor(
-    initialState: UiState,
-    processor: IntentionProcessor<UiState, Intention, SideEffect>,
-    intention: Intention,
-    assertions: ProcessorAssertions<UiState, SideEffect>.() -> Unit
+suspend fun <State, Intent, SideEffect> testProcessor(
+    initialState: State,
+    processor: IntentProcessor<State, Intent, SideEffect>,
+    intent: Intent,
+    assertions: ProcessorAssertions<State, SideEffect>.() -> Unit
 ) {
-    val testScope = ProcessorTestScope<UiState, SideEffect>(initialState)
+    val testScope = ProcessorTestScope<State, SideEffect>(initialState)
 
     with(processor) {
-        testScope.process(intention)
+        testScope.process(intent)
     }
 
     ProcessorAssertions(testScope).assertions()
@@ -24,17 +24,17 @@ suspend fun <UiState, Intention, SideEffect> testProcessor(
 /**
  * Testing with async support using TestScope.
  */
-suspend fun <UiState, Intention, SideEffect> TestScope.testProcessorAsync(
-    initialState: UiState,
-    processor: IntentionProcessor<UiState, Intention, SideEffect>,
-    intention: Intention,
-    assertions: suspend ProcessorAssertions<UiState, SideEffect>.() -> Unit
+suspend fun <State, Intent, SideEffect> TestScope.testProcessorAsync(
+    initialState: State,
+    processor: IntentProcessor<State, Intent, SideEffect>,
+    intent: Intent,
+    assertions: suspend ProcessorAssertions<State, SideEffect>.() -> Unit
 ) {
-    val testScope = ProcessorTestScope<UiState, SideEffect>(initialState, this)
+    val testScope = ProcessorTestScope<State, SideEffect>(initialState, this)
 
     try {
         with(processor) {
-            testScope.process(intention)
+            testScope.process(intent)
         }
 
         ProcessorAssertions(testScope).assertions()
@@ -46,17 +46,17 @@ suspend fun <UiState, Intention, SideEffect> TestScope.testProcessorAsync(
 /**
  * Test a processor that handles flows with fine-grained control.
  */
-suspend fun <UiState, Intention, SideEffect> TestScope.testProcessorWithFlows(
-    initialState: UiState,
-    processor: IntentionProcessor<UiState, Intention, SideEffect>,
-    intention: Intention,
-    test: suspend AdvancedProcessorTestScope<UiState, SideEffect>.() -> Unit
+suspend fun <State, Intent, SideEffect> TestScope.testProcessorWithFlows(
+    initialState: State,
+    processor: IntentProcessor<State, Intent, SideEffect>,
+    intent: Intent,
+    test: suspend AdvancedProcessorTestScope<State, SideEffect>.() -> Unit
 ) {
-    val advancedScope = AdvancedProcessorTestScope<UiState, SideEffect>(initialState, this)
+    val advancedScope = AdvancedProcessorTestScope<State, SideEffect>(initialState, this)
 
     try {
         with(processor) {
-            advancedScope.getScope().process(intention)
+            advancedScope.getScope().process(intent)
         }
 
         advancedScope.test()

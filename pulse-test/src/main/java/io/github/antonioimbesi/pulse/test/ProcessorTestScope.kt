@@ -13,19 +13,19 @@ import kotlinx.coroutines.launch
  * Test scope that captures all processor events in execution order.
  * Works for both sync and async processors.
  */
-class ProcessorTestScope<UiState, SideEffect>(
-    initialState: UiState,
+class ProcessorTestScope<State, SideEffect>(
+    initialState: State,
     private val coroutineScope: CoroutineScope? = null
-) : ProcessorScope<UiState, SideEffect> {
+) : ProcessorScope<State, SideEffect> {
     
-    private var _currentState: UiState = initialState
-    private val _events = mutableListOf<ProcessorEvent<UiState, SideEffect>>()
+    private var _currentState: State = initialState
+    private val _events = mutableListOf<ProcessorEvent<State, SideEffect>>()
     private val _activeJobs = mutableListOf<Job>()
     
-    override val currentUiState: UiState
+    override val currentState: State
         get() = _currentState
     
-    override fun reduce(reducer: UiState.() -> UiState) {
+    override fun reduce(reducer: State.() -> State) {
         val oldState = _currentState
         _currentState = _currentState.reducer()
         _events.add(ProcessorEvent.StateChange(oldState, _currentState))
@@ -68,15 +68,15 @@ class ProcessorTestScope<UiState, SideEffect>(
     
     // --- Getters for assertions ---
     
-    fun events(): List<ProcessorEvent<UiState, SideEffect>> = _events.toList()
+    fun events(): List<ProcessorEvent<State, SideEffect>> = _events.toList()
     
-    fun states(): List<UiState> = _events
-        .filterIsInstance<ProcessorEvent.StateChange<UiState>>()
+    fun states(): List<State> = _events
+        .filterIsInstance<ProcessorEvent.StateChange<State>>()
         .map { it.newState }
     
     fun sideEffects(): List<SideEffect> = _events
         .filterIsInstance<ProcessorEvent.SideEffectEmitted<SideEffect>>()
         .map { it.sideEffect }
     
-    fun finalState(): UiState = _currentState
+    fun finalState(): State = _currentState
 }

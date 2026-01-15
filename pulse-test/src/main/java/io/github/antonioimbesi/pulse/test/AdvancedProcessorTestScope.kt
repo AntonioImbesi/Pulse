@@ -9,24 +9,24 @@ import kotlinx.coroutines.test.advanceUntilIdle
 /**
  * Advanced test scope with additional utilities for complex scenarios.
  */
-class AdvancedProcessorTestScope<UiState, SideEffect>(
-    initialState: UiState,
+class AdvancedProcessorTestScope<State, SideEffect>(
+    initialState: State,
     private val testScope: TestScope
 ) {
-    private val processorScope = ProcessorTestScope<UiState, SideEffect>(initialState, testScope)
+    private val processorScope = ProcessorTestScope<State, SideEffect>(initialState, testScope)
     
-    val currentUiState: UiState get() = processorScope.currentUiState
-    val events: List<ProcessorEvent<UiState, SideEffect>> get() = processorScope.events()
-    val states: List<UiState> get() = processorScope.states()
+    val currentState: State get() = processorScope.currentState
+    val events: List<ProcessorEvent<State, SideEffect>> get() = processorScope.events()
+    val states: List<State> get() = processorScope.states()
     val sideEffects: List<SideEffect> get() = processorScope.sideEffects()
-    val finalState: UiState get() = processorScope.finalState()
+    val finalState: State get() = processorScope.finalState()
     
-    fun getScope(): ProcessorScope<UiState, SideEffect> = processorScope
+    fun getScope(): ProcessorScope<State, SideEffect> = processorScope
     
     /**
      * Advance virtual time and return current state for chaining.
      */
-    fun advanceTimeBy(delayTimeMillis: Long): AdvancedProcessorTestScope<UiState, SideEffect> {
+    fun advanceTimeBy(delayTimeMillis: Long): AdvancedProcessorTestScope<State, SideEffect> {
         testScope.advanceTimeBy(delayTimeMillis)
         return this
     }
@@ -34,7 +34,7 @@ class AdvancedProcessorTestScope<UiState, SideEffect>(
     /**
      * Advance until all pending tasks complete.
      */
-    fun advanceUntilIdle(): AdvancedProcessorTestScope<UiState, SideEffect> {
+    fun advanceUntilIdle(): AdvancedProcessorTestScope<State, SideEffect> {
         testScope.advanceUntilIdle()
         return this
     }
@@ -42,12 +42,12 @@ class AdvancedProcessorTestScope<UiState, SideEffect>(
     /**
      * Take a snapshot of current events.
      */
-    fun snapshotEvents(): List<ProcessorEvent<UiState, SideEffect>> = events.toList()
+    fun snapshotEvents(): List<ProcessorEvent<State, SideEffect>> = events.toList()
     
     /**
      * Get events since a specific position.
      */
-    fun eventsSince(position: Int): List<ProcessorEvent<UiState, SideEffect>> = 
+    fun eventsSince(position: Int): List<ProcessorEvent<State, SideEffect>> = 
         events.drop(position)
     
     /**
