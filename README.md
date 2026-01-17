@@ -367,16 +367,16 @@ internal class LoginIntentProcessorExecutor @Inject constructor(
     private val loginClickedProcessor: LoginClickedProcessor
 ) : ProcessorExecutor<LoginState, LoginIntent, LoginEffect> {
     override suspend fun execute(
-        context: ProcessorScope<LoginState, LoginEffect>,
+        processorScope: ProcessorScope<LoginState, LoginEffect>,
         intent: LoginIntent
     ) {
         when (intent) {
             is LoginIntent.EmailChanged -> 
-                with(emailChangedProcessor) { context.process(intent) }
+                with(emailChangedProcessor) { processorScope.process(intent) }
             is LoginIntent.PasswordChanged -> 
-                with(passwordChangedProcessor) { context.process(intent) }
+                with(passwordChangedProcessor) { processorScope.process(intent) }
             is LoginIntent.LoginClicked -> 
-                with(loginClickedProcessor) { context.process(intent) }
+                with(loginClickedProcessor) { processorScope.process(intent) }
         }
     }
 }
