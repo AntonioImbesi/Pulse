@@ -39,7 +39,7 @@ class CounterViewModel @Inject constructor(
 // Integrate with Compose
 @Composable
 fun CounterScreen(viewModel: CounterViewModel = viewModel()) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.collectState()
     
     Button(onClick = { viewModel dispatch CounterIntent.Increment }) {
         Text("Count: ${state.count}")
@@ -264,10 +264,10 @@ fun LoginScreen(
     viewModel: LoginViewModel = viewModel(),
     onNavigateToHome: () -> Unit
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.collectState()
     val context = LocalContext.current
     
-    viewModel.sideEffect.collectAsEffectWithLifecycle { effect ->
+    viewModel.collectSideEffect { effect ->
         when (effect) {
             is LoginEffect.NavigateToHome -> onNavigateToHome()
             is LoginEffect.ShowError -> Toast.makeText(context, effect.message, Toast.LENGTH_LONG).show()

@@ -14,13 +14,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.antonioimbesi.pulse.android.collectAsEffectWithLifecycle
+import io.github.antonioimbesi.pulse.android.collectSideEffect
+import io.github.antonioimbesi.pulse.android.collectState
 import io.github.antonioimbesi.pulse.sample.counter.contract.CounterIntent
 import io.github.antonioimbesi.pulse.sample.counter.contract.CounterSideEffect
 
@@ -34,9 +35,9 @@ class CounterActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val context = LocalContext.current
-            val state = viewModel.state.collectAsStateWithLifecycle()
+            val state by viewModel.collectState()
 
-            viewModel.sideEffect.collectAsEffectWithLifecycle { sideEffect ->
+            viewModel.collectSideEffect { sideEffect ->
                 when (sideEffect) {
                     is CounterSideEffect.BelowZero ->
                         Toast.makeText(context, "Below zero", Toast.LENGTH_SHORT).show()
@@ -60,7 +61,7 @@ class CounterActivity : ComponentActivity() {
                             onClick = { viewModel dispatch CounterIntent.Decrease },
                         ) { Text(text = "-") }
 
-                        Text(text = state.value.counter.toString())
+                        Text(text = state.counter.toString())
 
                         Button(
                             onClick = { viewModel dispatch CounterIntent.Increase },

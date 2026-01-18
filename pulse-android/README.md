@@ -24,15 +24,15 @@ class MyViewModel @Inject constructor(
 
 ### 2. Safe Side-Effect Collection
 
-Collecting side effects (like Navigation or Toasts) must be done carefully in Android. `collectAsEffectWithLifecycle` handles the complexity of pausing collection when the app is in the background.
+Collecting side effects (like Navigation or Toasts) must be done carefully in Android. `collectSideEffect` handles the complexity of pausing collection when the app is in the background.
 
 ```kotlin
 @Composable
 fun MyScreen(viewModel: MyViewModel) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.collectState()
     
     // Safety: Only collects when Lifecycle is at least STARTED
-    viewModel.sideEffect.collectAsEffectWithLifecycle { effect ->
+    viewModel.collectSideEffect { effect ->
         when (effect) {
             is Effect.Navigate -> navController.navigate(...)
             is Effect.ShowError -> toast(...)
@@ -110,12 +110,12 @@ class MyViewModelFactory : ViewModelProvider.Factory {
 
 ## Best Practices
 
-### ✅ DO: Use collectAsEffectWithLifecycle
+### ✅ DO: Use collectSideEffect
 Always use the provided extension for side effects to avoid crashes when the app is in the background.
 
 ```kotlin
 // Good
-viewModel.sideEffect.collectAsEffectWithLifecycle { ... }
+viewModel.collectSideEffect { ... }
 
 // Bad (unsafe in Compose)
 LaunchedEffect(Unit) {

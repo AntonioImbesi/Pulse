@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.antonioimbesi.pulse.android.collectState
 import io.github.antonioimbesi.pulse.sample.search.contract.SearchIntent
 import io.github.antonioimbesi.pulse.sample.search.contract.SearchState
 
@@ -35,7 +36,7 @@ fun SearchScreen(
     viewModel: SearchViewModel,
     modifier: Modifier
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.collectState()
 
     LaunchedEffect(Unit) {
         viewModel dispatch SearchIntent.Search()
