@@ -5,14 +5,36 @@ import io.github.antonioimbesi.pulse.core.processor.IntentProcessor
 import io.github.antonioimbesi.pulse.core.processor.ProcessorScope
 import io.github.antonioimbesi.pulse.core.processor.ProcessorExecutor
 
+/**
+ * Template-based code generator for [ProcessorExecutor][io.github.antonioimbesi.pulse.core.processor.ProcessorExecutor] implementations.
+ *
+ * Assembles Kotlin source code by combining:
+ * - Import statements for all referenced types
+ * - Constructor parameters for each processor dependency
+ * - A `when` expression routing each intent to its processor
+ *
+ * The generated executor is placed in a `.generated` subpackage and optionally
+ * annotated with `@Inject` when `javax.inject` is on the classpath.
+ *
+ * @see ProcessorExecutorGenerator The symbol processor that invokes this factory
+ */
 internal object ProcessorExecutorFactory {
 
-    // The usage of UPPER_SNAKE_CASE is a convention coming from Java. In Kotlin,
-    // the misuse of these variables won't lead to the same mistakes.
-    // I'm not against the usage of UPPER_SNAKE_CASE, it's more of a personal choice.
+    // Intentionally deviates from Kotlin's UPPER_SNAKE_CASE convention for const vals.
+    // Using camelCase for a private compile-time constant to align with local
+    // configuration-style identifiers.
     @Suppress("ConstPropertyName")
     private const val javaInjectName = "javax.inject.Inject"
 
+    /**
+     * Generates the complete Kotlin source for a ProcessorExecutor implementation.
+     *
+     * @param packageName The target package for the generated class (typically `.generated`).
+     * @param executorClassName The simple name for the generated executor class.
+     * @param processors The list of processors to route intents to.
+     * @param resolver KSP resolver for checking classpath dependencies (e.g., javax.inject).
+     * @return The complete Kotlin source file content as a string.
+     */
     internal fun generate(
         packageName: String,
         executorClassName: String,
@@ -57,6 +79,12 @@ internal object ProcessorExecutorFactory {
         """.trimMargin()
     }
 
+    /**
+     * Builds the sorted import block for the generated file.
+     *
+     * Includes core Pulse types, all processor classes, their handled intents,
+     * and optionally `javax.inject.Inject` when available.
+     */
     private fun buildImports(
         processors: List<ProcessorInfo>,
         mviContractInfo: MviContractInfo,
@@ -83,12 +111,24 @@ internal object ProcessorExecutorFactory {
         return imports.sorted().joinToString("\n") { "import $it" }
     }
 
+    /**
+     * Generates constructor parameter declarations for processor injection.
+     *
+     * Each processor becomes a `private val` constructor parameter, enabling
+     * dependency injection frameworks to provide the instances.
+     */
     private fun buildConstructorParameters(processors: List<ProcessorInfo>): String {
         return processors.joinToString(separator = ",\n    ") {
             "private val ${it.parameterName}: ${it.parameterType.declaration.simpleName.asString()}"
         }
     }
 
+    /**
+     * Generates the `when` expression branches for intent routing.
+     *
+     * Each branch matches a specific intent subtype and delegates to the
+     * corresponding processor using Kotlin's `with` scope function.
+     */
     private fun buildWhenCases(processors: List<ProcessorInfo>): String {
         return processors.joinToString(separator = "\n") {
             """
@@ -98,6 +138,12 @@ internal object ProcessorExecutorFactory {
         }
     }
 
+    /**
+     * Checks if `javax.inject.Inject` is on the classpath.
+     *
+     * When available, the generated executor is annotated with `@Inject` to enable
+     * automatic dependency injection without manual Hilt/Dagger module bindings.
+     */
     private fun isJavaInjectAvailable(resolver: Resolver): Boolean {
         return resolver.getClassDeclarationByName(
             name = resolver.getKSNameFromString(javaInjectName)
