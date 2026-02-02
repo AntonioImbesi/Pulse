@@ -8,7 +8,7 @@ import io.github.antonioimbesi.pulse.core.MviEngineFactory
 import io.github.antonioimbesi.pulse.core.engine.DefaultMviEngine
 import io.github.antonioimbesi.pulse.sample.search.contract.SearchIntent
 import io.github.antonioimbesi.pulse.sample.search.contract.SearchState
-import io.github.antonioimbesi.pulse.sample.search.contract.generated.SearchIntentProcessorExecutor
+import io.github.antonioimbesi.pulse.sample.search.processor.generated.SearchIntentProcessorExecutor
 
 @Module
 @InstallIn(ViewModelComponent::class)
